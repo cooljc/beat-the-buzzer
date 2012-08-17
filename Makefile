@@ -45,7 +45,8 @@ TARGET = beat-the-buzzer
 
 
 # List C source files here. (C dependencies are automatically generated.)
-SRC =	$(TARGET).c 	
+SRC =	$(TARGET).c 	\
+		lcd-driver.c
 
 
 # MCU name, Teensy has at90usb162, Teensy++ has at90usb646
