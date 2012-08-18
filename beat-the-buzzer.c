@@ -32,6 +32,7 @@
 /* ------------------------------------------------------------------ */
 /* ------------------------------------------------------------------ */
 #include "wdt_drv.h"
+#include "common.h"
 #include "timer0.h"
 #include "button-driver.h"
 #include "lcd-driver.h"
