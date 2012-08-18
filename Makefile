@@ -46,6 +46,8 @@ TARGET = beat-the-buzzer
 
 # List C source files here. (C dependencies are automatically generated.)
 SRC =	$(TARGET).c 	\
+		timer0.c		\
+		button-driver.c \
 		lcd-driver.c
 
 

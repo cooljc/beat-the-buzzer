@@ -32,13 +32,13 @@
 /* ------------------------------------------------------------------ */
 /* ------------------------------------------------------------------ */
 #include "wdt_drv.h"
+#include "timer0.h"
+#include "button-driver.h"
 #include "lcd-driver.h"
 
 /* ------------------------------------------------------------------ */
 /* ------------------------------------------------------------------ */
-typedef unsigned char  U8;
-typedef unsigned short U16;
-typedef unsigned int   U32;
+typedef uint8_t (*func_p)(uint8_t);
 
 // LEDs on POP-168 board: PD2 (Di2) & PD4 (Di4) - Tided high
 // Switches on POP-168 board: PD2 (Di2) & PD4 (Di4) 
@@ -57,9 +57,19 @@ typedef unsigned int   U32;
 
 
 
+/* ------------------------------------------------------------------ */
+/* ------------------------------------------------------------------ */
+uint8_t topMenu(uint8_t key);
+uint8_t gameRunning(uint8_t key);
+uint8_t gameOver(uint8_t key);
+enum {
+	ST_TOP_MENU = 0,
+	ST_GAME_RUNNING,
+	ST_GAME_OVER,
+	ST_MAX
+};
+func_p states[ST_MAX] = {topMenu, gameRunning, gameOver};
 
-/* ------------------------------------------------------------------ */
-/* ------------------------------------------------------------------ */
 
 /* ------------------------------------------------------------------ */
 /* ------------------------------------------------------------------ */
@@ -67,12 +77,62 @@ typedef unsigned int   U32;
 
 /* ------------------------------------------------------------------ */
 /* ------------------------------------------------------------------ */
+uint8_t topMenu(uint8_t key)
+{
+	static int enter = 1;
+	
+	if (enter) {
+		LCD_WriteLine(0, 16, "Beat The Buzzer ");
+		LCD_WriteLine(1, 16, "Press Start     ");
+		enter = 0;
+	}
+	
+	if (key == KEY_START) {
+		enter = 1;
+		return ST_GAME_RUNNING;
+	}
+	return ST_TOP_MENU;
+}
 
+/* ------------------------------------------------------------------ */
+/* ------------------------------------------------------------------ */
+uint8_t gameRunning(uint8_t key)
+{
+	static int enter = 1;
+	
+	if (enter) {
+		LCD_WriteLine(0, 16, "Beat The Buzzer ");
+		LCD_WriteLine(1, 16, "Lives Left:     ");
+		enter = 0;
+	}
+	
+	if (key == KEY_RESET) {
+		enter = 1;
+		return ST_TOP_MENU;
+	}
+	else if (key == KEY_LOOP) {
+		// TODO: Sound buzzer
+	}
+	return ST_GAME_RUNNING;
+}
+
+/* ------------------------------------------------------------------ */
+/* ------------------------------------------------------------------ */
+uint8_t gameOver(uint8_t key)
+{
+	return ST_GAME_OVER;
+}
 
 /* ------------------------------------------------------------------ */
 /* ------------------------------------------------------------------ */
 int main (void)
 {
+	uint8_t	button = KEY_NONE;
+	uint8_t state = ST_TOP_MENU;
+	uint8_t nextstate = ST_TOP_MENU;
+	uint8_t key = KEY_NONE;
+	func_p pStateFunc = states[state];
+	
 	
 	/* disable watchdog */
 	wdt_reset();
@@ -81,23 +141,24 @@ int main (void)
 	Wdt_stop();
 		
 	Clear_prescaler();
-
 	InitLED();
 	Led1On();
 	
+	Timer0_Init();
+	BUTTON_Init();
 	LCD_Init();
-	LCD_WriteLine(0, 11, "Hello World");
-	LCD_WriteLine(1, 15, "Beat The Buzzer");
-		
+	
+	sei();
 	
 	while (1)
 	{
-		_delay_ms(1000);
-		Led1Off();
-		Led2On();
-		_delay_ms(1000);
-		Led1On();
-		Led2Off();
+		key = BUTTON_GetKey();
+		nextstate = pStateFunc(key);
+		
+		if (nextstate != state) {
+			pStateFunc = states[nextstate];
+			state = nextstate;
+		}
 		
 	} /* end of while(1) */
 	return 0;
