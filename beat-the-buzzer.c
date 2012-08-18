@@ -128,7 +128,6 @@ uint8_t gameOver(uint8_t key)
 /* ------------------------------------------------------------------ */
 int main (void)
 {
-	uint8_t	button = KEY_NONE;
 	uint8_t state = ST_TOP_MENU;
 	uint8_t nextstate = ST_TOP_MENU;
 	uint8_t key = KEY_NONE;
