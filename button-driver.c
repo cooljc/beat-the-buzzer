@@ -29,8 +29,10 @@
 #include <avr/pgmspace.h>
 #include <inttypes.h>
 
-#include "button-driver.h"
 #include "common.h"
+#include "button-driver.h"
+#include "timer0.h"
+
 
 volatile char KEY = KEY_NONE;
 volatile bool KEY_VALID = FALSE;
@@ -64,8 +66,12 @@ void button_change_interrupt(void)
 	else if (buttons & (1<<PINC3)) {
 		key = KEY_RESET;
 	}
+	else if (loop & (1<<PINB0)) {
+		/* check game loop */
+		key = KEY_LOOP;
+	}
 	
-	/* check game loop */
+	/* TODO: Handle debounce!! */
 	if (key != KEY_NONE) {
 		if (!KEY_VALID) {
 			/* Store key in global key buffer */
@@ -75,16 +81,16 @@ void button_change_interrupt(void)
 	}
 	
 	/* Delete pin change interrupt flags */
-	PCIFR = (1<<PCIF1);// | (1<<PCIF0);
+	PCIFR = (1<<PCIF1) | (1<<PCIF0);
 }
 
 
 /* ------------------------------------------------------------------ */
 /* ------------------------------------------------------------------ */
-//ISR(PCINT0_vect)
-//{
-//    button_change_interrupt();
-//}
+ISR(PCINT0_vect)
+{
+    button_change_interrupt();
+}
 /* ------------------------------------------------------------------ */
 /* ------------------------------------------------------------------ */
 ISR(PCINT1_vect)
@@ -99,7 +105,7 @@ void BUTTON_Init(void)
 {
 	/* setup port directions */
 	DDRB &= ~(PINB_MASK);
-	//PORTB |= PINB_MASK;
+	PORTB |= PINB_MASK; /* enable pullup */
 	DDRC &= ~(PINC_MASK);
 	
 	//
@@ -107,8 +113,8 @@ void BUTTON_Init(void)
 	//PCMSK0 |= (1<<PCINT0);
 	PCMSK1 |= ((1<<PCINT9) | (1<<PCINT11));
 	
-	PCIFR = (1<<PCIF1);
-    PCICR = (1<<PCIE1);
+	PCIFR = (1<<PCIF1) | (1<<PCIF0);
+    PCICR = (1<<PCIE1) | (1<<PCIE1);
     
     CountdownTimerHandle = Timer0_AllocateCountdownTimer();
 }
