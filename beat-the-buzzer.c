@@ -36,6 +36,7 @@
 #include "timer0.h"
 #include "button-driver.h"
 #include "lcd-driver.h"
+#include "speaker-driver.h"
 
 /* ------------------------------------------------------------------ */
 /* ------------------------------------------------------------------ */
@@ -124,6 +125,7 @@ uint8_t gameOver(uint8_t key)
 	return ST_GAME_OVER;
 }
 
+
 /* ------------------------------------------------------------------ */
 /* ------------------------------------------------------------------ */
 int main (void)
@@ -145,6 +147,7 @@ int main (void)
 	Led1On();
 	
 	Timer0_Init();
+	SPEAKER_Init();
 	BUTTON_Init();
 	LCD_Init();
 	

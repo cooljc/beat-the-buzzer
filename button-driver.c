@@ -27,10 +27,12 @@
 #include <avr/io.h>
 #include <avr/interrupt.h>
 #include <avr/pgmspace.h>
+#include <util/delay.h>
 #include <inttypes.h>
 
 #include "common.h"
 #include "button-driver.h"
+#include "speaker-driver.h"
 #include "timer0.h"
 
 
@@ -77,6 +79,7 @@ void button_change_interrupt(void)
 			/* Store key in global key buffer */
 			KEY = key;
 			KEY_VALID = TRUE;
+			SPEAKER_Beep();
 		}
 	}
 	
@@ -107,8 +110,7 @@ void BUTTON_Init(void)
 	DDRB &= ~(PINB_MASK);
 	PORTB |= PINB_MASK; /* enable pullup */
 	DDRC &= ~(PINC_MASK);
-	
-	//
+
 	/* setup interrupts */
 	//PCMSK0 |= (1<<PCINT0);
 	PCMSK1 |= ((1<<PCINT9) | (1<<PCINT11));
