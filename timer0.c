@@ -74,21 +74,21 @@ void Timer0_Init(void)
 
 
 /* ------------------------------------------------------------------ *
- * 
+ *
  *   Function name : TIMER0_COMP_interrupt
  *   Returns :       None
  *   Parameters :    None
  *   Purpose :       Check if any functions are to be called
  *
  * ------------------------------------------------------------------ */
-ISR(TIMER0_COMP_vect)
+ISR(TIMER0_COMPA_vect)
 {
     uint8_t i;
-    
+
     for (i=0; i<TIMER0_NUM_CALLBACKS; i++)
         if (CallbackFunc[i] != NULL)
             CallbackFunc[i]();
-    
+
     // Count down timers
     for (i=0; i<TIMER0_NUM_COUNTDOWNTIMERS; i++)
         if (CountDownTimers[i] != 255 && CountDownTimers[i] != 0)
@@ -102,29 +102,29 @@ ISR(TIMER0_COMP_vect)
  *   Function name : Timer0_RegisterCallbackFunction
  *   Returns :       None
  *   Parameters :    pFunc
- *   Purpose :       Set up functions to be called from the 
+ *   Purpose :       Set up functions to be called from the
  *                   TIMER0_COMP_interrupt
  *
  * ------------------------------------------------------------------ */
 bool Timer0_RegisterCallbackFunction(TIMER_CALLBACK_FUNC pFunc)
 {
     uint8_t i;
-    
+
     for (i=0; i<TIMER0_NUM_CALLBACKS; i++)
     {
         if (CallbackFunc[i] == pFunc)
             return TRUE;
     }
-    
+
     for (i=0; i<TIMER0_NUM_CALLBACKS; i++)
     {
         if (CallbackFunc[i] == NULL)
         {
             CallbackFunc[i] = pFunc;
             return TRUE;
-        }   
+        }
     }
-    
+
     return FALSE;
 }
 
@@ -141,7 +141,7 @@ bool Timer0_RegisterCallbackFunction(TIMER_CALLBACK_FUNC pFunc)
 bool Timer0_RemoveCallbackFunction(TIMER_CALLBACK_FUNC pFunc)
 {
     uint8_t i;
-    
+
     for (i=0; i<TIMER0_NUM_CALLBACKS; i++)
     {
         if (CallbackFunc[i] == pFunc)
@@ -150,7 +150,7 @@ bool Timer0_RemoveCallbackFunction(TIMER_CALLBACK_FUNC pFunc)
             return TRUE;
         }
     }
-        
+
     return FALSE;
 }
 
@@ -187,7 +187,7 @@ char Timer0_GetCountdownTimer(char timer)
     cli();
     t = CountDownTimers[timer-1];
     sei();
-    
+
     return t;
 }
 
